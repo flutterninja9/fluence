@@ -1,0 +1,19 @@
+# Dockerfile for Dart code execution sandbox
+FROM dart:stable
+
+# Install security tools and create restricted user
+RUN apt-get update && apt-get install -y \
+    --no-install-recommends \
+    curl \
+    && rm -rf /var/lib/apt/lists/* \
+    && useradd -m -s /bin/bash -u 1001 sandbox
+
+# Set up workspace
+WORKDIR /workspace
+RUN chown sandbox:sandbox /workspace
+
+# Switch to restricted user
+USER sandbox
+
+# Default command
+CMD ["dart", "--version"]
