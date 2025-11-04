@@ -31,37 +31,37 @@ dependencies:
   flutter:
     sdk: flutter
 
-  # Authentication and Database
-  supabase_flutter: ^2.3.4
+  # Flutter UI Framework Components
+  forui: ^0.7.0
   
-  # HTTP requests
-  dio: ^5.4.0
+  # State Management
+  flutter_riverpod: ^2.6.1
+  riverpod: ^2.6.1
   
   # Navigation
-  go_router: ^13.2.0
+  go_router: ^14.7.1
   
-  # UI Components (shadcn-like for Flutter)
-  forui: ^0.16.0
+  # HTTP Requests
+  dio: ^5.7.0
+  
+  # Supabase
+  supabase_flutter: ^2.8.3
   
   # Code Editor
-  code_text_field: ^1.1.0
-  highlight: ^0.7.0
+  flutter_highlight: ^0.7.0
+  flutter_code_editor: ^0.2.4
   
-  # JSON serialization
-  json_annotation: ^4.8.1
+  # JSON Serialization
+  json_annotation: ^4.9.0
+  equatable: ^2.0.5
   
   # Markdown rendering
   flutter_markdown: ^0.6.18
   
-  # State management
-  flutter_riverpod: ^2.4.9
-  
-  # Utilities
-  equatable: ^2.0.5
-  
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.8
+  highlight: ^0.7.0
 
 dev_dependencies:
   flutter_test:
