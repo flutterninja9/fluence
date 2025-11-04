@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 import uvicorn
 from config import settings
-from api.routes import health, execute_code
+from api.routes import health, execute_code, challenges, submissions
 
 def create_app() -> FastAPI:
     app = FastAPI(
@@ -25,6 +25,8 @@ def create_app() -> FastAPI:
     # Include routers
     app.include_router(health.router, prefix="/api", tags=["Health"])
     app.include_router(execute_code.router, prefix="/api", tags=["Code Execution"])
+    app.include_router(challenges.router, prefix="/api", tags=["Challenges"])
+    app.include_router(submissions.router, prefix="/api", tags=["Submissions"])
     
     return app
 

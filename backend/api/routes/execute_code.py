@@ -1,22 +1,10 @@
 from fastapi import APIRouter, HTTPException
 from fastapi.responses import JSONResponse
-from pydantic import BaseModel
-from typing import Optional
-import asyncio
-import json
+from models.submission import CodeExecutionRequest, CodeExecutionResponse
 from utils.sandbox_runner import DartCodeRunner
+from datetime import datetime
 
 router = APIRouter()
-
-class CodeExecutionRequest(BaseModel):
-    code: str
-    test_script: Optional[str] = None
-
-class CodeExecutionResponse(BaseModel):
-    success: bool
-    output: str
-    errors: Optional[str] = None
-    execution_time: float
 
 @router.post("/execute", response_model=CodeExecutionResponse)
 async def execute_code(request: CodeExecutionRequest):
@@ -29,7 +17,8 @@ async def execute_code(request: CodeExecutionRequest):
             success=result["success"],
             output=result["output"],
             errors=result.get("errors"),
-            execution_time=result["execution_time"]
+            execution_time=result["execution_time"],
+            timestamp=datetime.utcnow()
         )
     
     except Exception as e:
