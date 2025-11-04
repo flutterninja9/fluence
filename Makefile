@@ -64,7 +64,7 @@ run-backend: ## Start FastAPI backend server
 
 run-frontend: ## Start Flutter web development server
 	@echo "📱 Starting frontend server..."
-	cd frontend && flutter run -d web-server --web-port 3000
+	cd frontend && flutter run --dart-define-from-file .env -d web-server --web-port 3000
 
 run-backend-bg: ## Start backend server in background
 	@echo "🐍 Starting backend server in background..."
