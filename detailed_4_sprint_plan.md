@@ -10,12 +10,12 @@ Building a Flutter-based coding platform like LeetCode focused on learning and e
 
 ### Backend Setup
 **Priority: High**
-- [ ] Initialize FastAPI project structure
-- [ ] Set up Docker containerization for code execution
-- [ ] Create sandbox environment for running Dart/Flutter code safely
-- [ ] Implement basic health check endpoint
-- [ ] Deploy backend to Render/Cloud Run
-- [ ] Set up CI/CD pipeline for backend
+- [x] Initialize FastAPI project structure
+- [x] Set up Docker containerization for code execution
+- [x] Create sandbox environment for running Dart/Flutter code safely
+- [x] Implement basic health check endpoint
+- [x] Deploy backend to Render/Cloud Run
+- [x] Set up CI/CD pipeline for backend
 
 **Deliverables:**
 - Working FastAPI server with `/health` endpoint
@@ -24,12 +24,12 @@ Building a Flutter-based coding platform like LeetCode focused on learning and e
 
 ### Database & Authentication
 **Priority: High**
-- [ ] Set up Supabase project
-- [ ] Create database schema (users, challenges, submissions, feedback tables)
-- [ ] Configure Row Level Security (RLS) policies
-- [ ] Set up Google/GitHub OAuth providers
-- [ ] Create database triggers and functions
-- [ ] Test authentication flow
+- [x] Set up Supabase project
+- [x] Create database schema (users, challenges, submissions, feedback tables)
+- [x] Configure Row Level Security (RLS) policies
+- [x] Set up Google/GitHub OAuth providers
+- [x] Create database triggers and functions
+- [x] Test authentication flow
 
 **Deliverables:**
 - Complete database schema deployed
@@ -38,12 +38,12 @@ Building a Flutter-based coding platform like LeetCode focused on learning and e
 
 ### Frontend Foundation
 **Priority: High**
-- [ ] Initialize Flutter web project with proper folder structure
-- [ ] Set up go_router with authentication guards
-- [ ] Install and configure dependencies (supabase, dio, json_serializable, forui)
-- [ ] Create basic app shell with navigation
-- [ ] Implement authentication service
-- [ ] Create responsive layout structure
+- [x] Initialize Flutter web project with proper folder structure
+- [x] Set up go_router with authentication guards
+- [x] Install and configure dependencies (supabase, dio, json_serializable, forui)
+- [x] Create basic app shell with navigation
+- [x] Implement authentication service
+- [x] Create responsive layout structure
 
 **Deliverables:**
 - Flutter app with routing and authentication
@@ -52,10 +52,10 @@ Building a Flutter-based coding platform like LeetCode focused on learning and e
 
 ### Development Environment
 **Priority: Medium**
-- [ ] Set up local development environment documentation
-- [ ] Create development scripts and commands
-- [ ] Set up environment variables management
-- [ ] Configure code formatting and linting rules
+- [x] Set up local development environment documentation
+- [x] Create development scripts and commands
+- [x] Set up environment variables management
+- [x] Configure code formatting and linting rules
 
 **Sprint 1 Acceptance Criteria:**
 - ✅ User can visit the app and sign in with Google/GitHub
