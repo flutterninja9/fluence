@@ -38,13 +38,19 @@ class Challenge extends Equatable {
   final String id;
   final String title;
   final String description;
+  @JsonKey(name: 'starter_code')
   final String starterCode;
+  @JsonKey(name: 'test_script')
   final String? testScript;
+  @JsonKey(name: 'is_premium')
   final bool isPremium;
   final DifficultyLevel difficulty;
   final ChallengeCategory category;
+  @JsonKey(name: 'sort_order')
   final int sortOrder;
+  @JsonKey(name: 'created_at')
   final DateTime createdAt;
+  @JsonKey(name: 'updated_at')
   final DateTime updatedAt;
 
   const Challenge({
@@ -114,8 +120,11 @@ class ChallengeList extends Equatable {
   final List<Challenge> challenges;
   final int total;
   final int page;
+  @JsonKey(name: 'per_page')
   final int perPage;
+  @JsonKey(name: 'has_next')
   final bool hasNext;
+  @JsonKey(name: 'has_prev')
   final bool hasPrev;
 
   const ChallengeList({

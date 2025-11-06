@@ -3,8 +3,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../models/challenge.dart';
 import '../providers/challenge_providers.dart';
+import '../providers/progress_providers.dart';
 import '../services/api_service.dart';
 import '../widgets/code_editor.dart';
+import '../widgets/feedback_dialog.dart';
+import '../widgets/hint_system.dart';
+import '../widgets/toast_listener.dart';
 
 class ChallengeDetailScreen extends ConsumerStatefulWidget {
   final String challengeId;
@@ -18,50 +22,92 @@ class ChallengeDetailScreen extends ConsumerStatefulWidget {
 
 class _ChallengeDetailScreenState extends ConsumerState<ChallengeDetailScreen> {
   bool _isRunning = false;
+  int _failedAttempts = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    // Auto-restore latest submission when screen loads
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _autoRestoreProgress();
+    });
+  }
+
+  Future<void> _autoRestoreProgress() async {
+    try {
+      final latestSubmission = await ref.read(
+        latestSubmissionProvider(widget.challengeId).future,
+      );
+      if (latestSubmission != null && latestSubmission.code.isNotEmpty) {
+        ref
+            .read(codeEditorProvider(widget.challengeId).notifier)
+            .updateCode(latestSubmission.code);
+
+        // Show info toast about restored progress
+        final toastNotifier = ref.read(toastProvider.notifier);
+        toastNotifier.showInfo('Previous progress restored! 📝');
+      }
+    } catch (e) {
+      // Silently fail - not critical
+      // ignore: avoid_print
+      print('Failed to restore progress: $e');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     final challengeAsync = ref.watch(challengeProvider(widget.challengeId));
 
-    return Scaffold(
-      appBar: AppBar(
-        title: challengeAsync.when(
-          data: (challenge) => Text(challenge.title),
-          loading: () => const Text('Loading...'),
-          error: (_, __) => const Text('Error'),
+    return ToastListener(
+      child: Scaffold(
+        appBar: AppBar(
+          title: challengeAsync.when(
+            data: (challenge) => Text(challenge.title),
+            loading: () => const Text('Loading...'),
+            error: (_, __) => const Text('Error'),
+          ),
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.refresh),
+              onPressed: () {
+                ref.invalidate(challengeProvider(widget.challengeId));
+              },
+            ),
+          ],
         ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh),
-            onPressed: () {
-              ref.refresh(challengeProvider(widget.challengeId));
-            },
+        body: challengeAsync.when(
+          data: (challenge) => _buildChallengeContent(challenge),
+          loading: () => const Center(child: CircularProgressIndicator()),
+          error: (error, _) => Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  Icons.error,
+                  size: 64,
+                  color: Theme.of(context).colorScheme.error,
+                ),
+                const SizedBox(height: 16),
+                Text('Error: $error'),
+                const SizedBox(height: 16),
+                ElevatedButton(
+                  onPressed: () {
+                    ref.invalidate(challengeProvider(widget.challengeId));
+                  },
+                  child: const Text('Retry'),
+                ),
+              ],
+            ),
           ),
-        ],
-      ),
-      body: challengeAsync.when(
-        data: (challenge) => _buildChallengeContent(challenge),
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, _) => Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(
-                Icons.error,
-                size: 64,
-                color: Theme.of(context).colorScheme.error,
-              ),
-              const SizedBox(height: 16),
-              Text('Error: $error'),
-              const SizedBox(height: 16),
-              ElevatedButton(
-                onPressed: () {
-                  ref.refresh(challengeProvider(widget.challengeId));
-                },
-                child: const Text('Retry'),
-              ),
-            ],
+        ),
+        floatingActionButton: challengeAsync.when(
+          data: (challenge) => FloatingActionButton(
+            onPressed: () => _showFeedbackDialog(challenge),
+            tooltip: 'Give Feedback',
+            child: const Icon(Icons.feedback),
           ),
+          loading: () => null,
+          error: (_, __) => null,
         ),
       ),
     );
@@ -193,6 +239,13 @@ class _ChallengeDetailScreenState extends ConsumerState<ChallengeDetailScreen> {
                       onPressed: () => _resetCode(challenge),
                       icon: const Icon(Icons.refresh),
                       label: const Text('Reset'),
+                    ),
+                    const SizedBox(width: 8),
+                    // Hint System Button
+                    IconButton(
+                      onPressed: () => _showHintSystem(challenge),
+                      icon: const Icon(Icons.lightbulb_outline),
+                      tooltip: 'Get Hints',
                     ),
                     const Spacer(),
                     OutlinedButton.icon(
@@ -498,9 +551,23 @@ class _ChallengeDetailScreenState extends ConsumerState<ChallengeDetailScreen> {
 
     try {
       final code = ref.read(codeEditorProvider(widget.challengeId));
+
+      // Auto-save progress before execution
+      final progressNotifier = ref.read(progressPersistenceProvider.notifier);
+      await progressNotifier.autoSaveProgress(challenge.id, code);
+
       await ref
           .read(codeExecutionProvider.notifier)
           .executeCode(challenge.id, code);
+
+      // Show success toast
+      final toastNotifier = ref.read(toastProvider.notifier);
+      toastNotifier.showSuccess('Code executed successfully!');
+    } catch (e) {
+      // Show error toast and increment failed attempts
+      final toastNotifier = ref.read(toastProvider.notifier);
+      toastNotifier.showError('Code execution failed: $e');
+      setState(() => _failedAttempts++);
     } finally {
       setState(() => _isRunning = false);
     }
@@ -532,25 +599,38 @@ class _ChallengeDetailScreenState extends ConsumerState<ChallengeDetailScreen> {
       try {
         // Submit the code using API service
         final apiService = ref.read(apiServiceProvider);
-        await apiService.createSubmission(challenge.id, code);
+        final result = await apiService.createSubmission(challenge.id, code);
 
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Solution submitted successfully!'),
-              backgroundColor: Colors.green,
-            ),
-          );
+        // Save progress
+        final progressNotifier = ref.read(progressPersistenceProvider.notifier);
+        final isSuccessful = result.status.name == 'passed';
+        await progressNotifier.saveProgress(
+          challenge.id,
+          code,
+          isSuccessful: isSuccessful,
+        );
+
+        // Show toast notification
+        final toastNotifier = ref.read(toastProvider.notifier);
+        if (isSuccessful) {
+          toastNotifier.showSuccess('Solution submitted successfully! 🎉');
+        } else {
+          toastNotifier.showInfo('Solution submitted for review.');
+        }
+
+        // Offer feedback after successful submission
+        if (isSuccessful && mounted) {
+          Future.delayed(const Duration(seconds: 1), () {
+            if (mounted) {
+              _showFeedbackDialog(challenge);
+            }
+          });
         }
       } catch (e) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Failed to submit: $e'),
-              backgroundColor: Colors.red,
-            ),
-          );
-        }
+        // Show error toast
+        final toastNotifier = ref.read(toastProvider.notifier);
+        toastNotifier.showError('Failed to submit: $e');
+        setState(() => _failedAttempts++);
       }
     }
   }
@@ -564,5 +644,30 @@ class _ChallengeDetailScreenState extends ConsumerState<ChallengeDetailScreen> {
 
   void _formatCode() {
     ref.read(codeEditorProvider(widget.challengeId).notifier).formatCode();
+  }
+
+  void _showHintSystem(Challenge challenge) {
+    showDialog(
+      context: context,
+      builder: (context) => Dialog(
+        child: Container(
+          constraints: const BoxConstraints(maxWidth: 600, maxHeight: 500),
+          child: HintSystem(
+            challengeId: challenge.id,
+            failedAttempts: _failedAttempts,
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showFeedbackDialog(Challenge challenge) {
+    showDialog(
+      context: context,
+      builder: (context) => FeedbackDialog(
+        challengeId: challenge.id,
+        challengeTitle: challenge.title,
+      ),
+    );
   }
 }

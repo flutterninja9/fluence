@@ -10,28 +10,28 @@ Challenge _$ChallengeFromJson(Map<String, dynamic> json) => Challenge(
   id: json['id'] as String,
   title: json['title'] as String,
   description: json['description'] as String,
-  starterCode: json['starterCode'] as String,
-  testScript: json['testScript'] as String?,
-  isPremium: json['isPremium'] as bool,
+  starterCode: json['starter_code'] as String,
+  testScript: json['test_script'] as String?,
+  isPremium: json['is_premium'] as bool,
   difficulty: $enumDecode(_$DifficultyLevelEnumMap, json['difficulty']),
   category: $enumDecode(_$ChallengeCategoryEnumMap, json['category']),
-  sortOrder: (json['sortOrder'] as num).toInt(),
-  createdAt: DateTime.parse(json['createdAt'] as String),
-  updatedAt: DateTime.parse(json['updatedAt'] as String),
+  sortOrder: (json['sort_order'] as num).toInt(),
+  createdAt: DateTime.parse(json['created_at'] as String),
+  updatedAt: DateTime.parse(json['updated_at'] as String),
 );
 
 Map<String, dynamic> _$ChallengeToJson(Challenge instance) => <String, dynamic>{
   'id': instance.id,
   'title': instance.title,
   'description': instance.description,
-  'starterCode': instance.starterCode,
-  'testScript': instance.testScript,
-  'isPremium': instance.isPremium,
+  'starter_code': instance.starterCode,
+  'test_script': instance.testScript,
+  'is_premium': instance.isPremium,
   'difficulty': _$DifficultyLevelEnumMap[instance.difficulty]!,
   'category': _$ChallengeCategoryEnumMap[instance.category]!,
-  'sortOrder': instance.sortOrder,
-  'createdAt': instance.createdAt.toIso8601String(),
-  'updatedAt': instance.updatedAt.toIso8601String(),
+  'sort_order': instance.sortOrder,
+  'created_at': instance.createdAt.toIso8601String(),
+  'updated_at': instance.updatedAt.toIso8601String(),
 };
 
 const _$DifficultyLevelEnumMap = {
@@ -59,9 +59,9 @@ ChallengeList _$ChallengeListFromJson(Map<String, dynamic> json) =>
           .toList(),
       total: (json['total'] as num).toInt(),
       page: (json['page'] as num).toInt(),
-      perPage: (json['perPage'] as num).toInt(),
-      hasNext: json['hasNext'] as bool,
-      hasPrev: json['hasPrev'] as bool,
+      perPage: (json['per_page'] as num).toInt(),
+      hasNext: json['has_next'] as bool,
+      hasPrev: json['has_prev'] as bool,
     );
 
 Map<String, dynamic> _$ChallengeListToJson(ChallengeList instance) =>
@@ -69,9 +69,9 @@ Map<String, dynamic> _$ChallengeListToJson(ChallengeList instance) =>
       'challenges': instance.challenges,
       'total': instance.total,
       'page': instance.page,
-      'perPage': instance.perPage,
-      'hasNext': instance.hasNext,
-      'hasPrev': instance.hasPrev,
+      'per_page': instance.perPage,
+      'has_next': instance.hasNext,
+      'has_prev': instance.hasPrev,
     };
 
 ChallengeFilters _$ChallengeFiltersFromJson(

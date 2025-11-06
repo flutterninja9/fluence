@@ -50,7 +50,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => const ChallengeListScreen(),
       ),
       GoRoute(
-        path: '/challenge/:id',
+        path: '/challenges/:id',
         name: 'challenge-detail',
         builder: (context, state) {
           final id = state.pathParameters['id']!;
